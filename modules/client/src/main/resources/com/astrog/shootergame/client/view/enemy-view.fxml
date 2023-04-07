@@ -5,7 +5,7 @@
 <?import java.lang.Double?>
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      layoutX="-1000.0" layoutY="-1000.0" prefHeight="60.0" prefWidth="128.0" scaleX="0.3" scaleY="0.3">
+      layoutX="-1000.0" layoutY="-1000.0" prefHeight="60.0" prefWidth="128.0" scaleX="1" scaleY="1">
     <children>
         <Polygon fill="#ff3349" layoutX="52.0" layoutY="259.0" rotate="90.0" scaleY="0.7" stroke="BLACK"
                  strokeType="INSIDE">

@@ -19,8 +19,8 @@ public class EnemyView  implements FxDrawer {
     @Override
     public void draw(Pane scene) {
         HBox view = getView();
-        view.setLayoutX(0);
-        view.setLayoutY(y);
+        view.setLayoutX(-13);
+        view.setLayoutY(y - 50);
         scene.getChildren().add(view);
     }
 }
