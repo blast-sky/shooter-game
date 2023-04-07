@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.shape.Polygon?>
+<?import javafx.scene.shape.Rectangle?>
+<?import java.lang.*?>
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      layoutX="-1000.0" layoutY="-1000.0" prefHeight="60.0" prefWidth="128.0" scaleX="0.3" scaleY="0.3">
+    <children>
+        <Rectangle arcHeight="5.0" arcWidth="5.0" height="100.0" scaleY="0.2" stroke="BLACK" strokeType="INSIDE"
+                   width="150.0"/>
+        <Polygon rotate="90.0" scaleX="0.7" stroke="BLACK" strokeType="INSIDE">
+            <points>
+                <Double fx:value="-50.0"/>
+                <Double fx:value="40.0"/>
+                <Double fx:value="50.0"/>
+                <Double fx:value="40.0"/>
+                <Double fx:value="0.0"/>
+                <Double fx:value="-60.0"/>
+            </points>
+        </Polygon>
+    </children>
+</HBox>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.shape.Polygon?>
+<?import java.lang.Double?>
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      layoutX="-1000.0" layoutY="-1000.0" prefHeight="60.0" prefWidth="128.0" scaleX="0.3" scaleY="0.3">
+    <children>
+        <Polygon fill="#ff3349" layoutX="52.0" layoutY="259.0" rotate="90.0" scaleY="0.7" stroke="BLACK"
+                 strokeType="INSIDE">
+            <points>
+                <Double fx:value="-50.0"/>
+                <Double fx:value="40.0"/>
+                <Double fx:value="50.0"/>
+                <Double fx:value="40.0"/>
+                <Double fx:value="0.0"/>
+                <Double fx:value="-60.0"/>
+            </points>
+        </Polygon>
+    </children>
+</HBox>

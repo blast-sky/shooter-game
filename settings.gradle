@@ -1,0 +1,6 @@
+rootProject.name = "shooter-game"
+
+include ":modules:client"
+include ":modules:common"
+include ":modules:server"
+

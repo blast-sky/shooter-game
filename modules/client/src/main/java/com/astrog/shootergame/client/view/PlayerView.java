@@ -1,0 +1,26 @@
+package com.astrog.shootergame.client.view;
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+
+@RequiredArgsConstructor
+public class PlayerView  implements FxDrawer {
+
+    @SneakyThrows
+    private static HBox getView() {
+        return new FXMLLoader(EnemyView.class.getResource("player-view.fxml")).load();
+    }
+
+    private final double y;
+
+    @Override
+    public void draw(Pane scene) {
+        HBox view = getView();
+        view.setLayoutX(-13);
+        view.setLayoutY(y - 50);
+        scene.getChildren().add(view);
+    }
+}
