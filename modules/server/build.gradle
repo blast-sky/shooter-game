@@ -7,7 +7,7 @@ plugins {
 }
 
 group "com.astrog"
-version "1.0"
+version "1.1"
 
 repositories {
     mavenCentral()
@@ -36,7 +36,12 @@ javafx {
 
 dependencies {
     implementation(project(":modules:common"))
+
+    implementation("org.postgresql:postgresql:42.1.4")
+    implementation("org.hibernate:hibernate-core:6.2.1.Final")
+
     implementation("org.projectlombok:lombok:1.18.26")
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }

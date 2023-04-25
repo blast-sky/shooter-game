@@ -3,6 +3,7 @@ package com.astrog.shootergame.common.socket;
 import lombok.SneakyThrows;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -22,17 +23,16 @@ public class Client {
     }
 
     @SneakyThrows
-    public boolean hasIncomingMessages() {
-        return reader.ready();
+    public void setSoTimeout(int timeoutInMillis) {
+        socket.setSoTimeout(timeoutInMillis);
     }
 
-    @SneakyThrows
-    public String getNextMessage() {
+    public String getNextMessage() throws IOException {
         return reader.readLine();
     }
 
     @SneakyThrows
-    public void printMessage(String message) {
+    public void print(String message) {
         writer.println(message);
     }
 
@@ -41,7 +41,7 @@ public class Client {
         socket.close();
     }
 
-    public boolean isClosed() {
-        return socket.isClosed();
+    public boolean isOpened() {
+        return !socket.isClosed();
     }
 }

@@ -4,6 +4,7 @@ import com.astrog.shootergame.common.socket.Client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Topic {
 
@@ -12,12 +13,14 @@ public class Topic {
 
     public void addListener(Client client) {
         listeners.add(client);
+        Optional.ofNullable(lastMessage)
+            .ifPresent(client::print);
     }
 
     public void broadcast(String message) {
         lastMessage = message;
         for (Client listener : listeners) {
-            listener.printMessage(message);
+            listener.print(message);
         }
     }
 }

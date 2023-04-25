@@ -9,6 +9,7 @@ import com.astrog.shootergame.server.internal.ShooterGameRestController;
 import com.astrog.shootergame.server.internal.state.InvitePlayersToPartyServerState;
 import lombok.SneakyThrows;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 
 final public class Server {
@@ -66,11 +67,11 @@ final public class Server {
         new Thread(() -> {
             messageQueue.put(new Message(client, Event.CONNECTION.name()));
             try {
-                while (!client.isClosed()) {
+                while (client.isOpened()) {
                     String line = client.getNextMessage();
                     messageQueue.put(MessageSerializer.deserializeRequest(client, line));
                 }
-            } catch (RuntimeException ex) {
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
             messageQueue.put(new Message(client, Event.DISCONNECTION.name()));

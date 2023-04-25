@@ -56,6 +56,10 @@ public class ArcherGameContext {
         return rule.isGameOver(playerScoreMap);
     }
 
+    public String getWinner() {
+        return rule.getWinner(playerScoreMap);
+    }
+
     private void checkCollisionAndInFieldBoundary() {
         for (Target target : targets) {
             Bounds targetBounds = target.getBounds();

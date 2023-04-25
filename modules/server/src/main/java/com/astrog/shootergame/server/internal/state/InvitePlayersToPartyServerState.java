@@ -9,9 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.astrog.shootergame.common.Constants.MAX_CLIENT_IN_PARTY_COUNT;
-import static com.astrog.shootergame.common.Constants.ServerMessages.LOGIN_SUCCESS;
-import static com.astrog.shootergame.common.Constants.ServerMessages.NAME_ALREADY_EXIST;
-import static com.astrog.shootergame.common.Constants.ServerMessages.PARTY_COMPLETE;
+import static com.astrog.shootergame.common.messaging.CustomEvent.RESPONSE_LOGIN;
+import static com.astrog.shootergame.common.messaging.CustomEvent.PARTY_COMPLETE;
+import static com.astrog.shootergame.common.messaging.MessageFormatter.formatMessage;
+import static com.astrog.shootergame.common.messaging.serialization.ObjectToStringSerializer.serialize;
 
 @RequiredArgsConstructor
 public class InvitePlayersToPartyServerState implements ServerState {
@@ -25,20 +26,19 @@ public class InvitePlayersToPartyServerState implements ServerState {
     @Override
     public void onLogin(Client client, String name) {
         if (players.stream().anyMatch(player -> player.name().equals(name))) {
-            client.printMessage(NAME_ALREADY_EXIST.name());
-            client.disconnect();
+            client.print(formatMessage(RESPONSE_LOGIN.name(), serialize(false)));
             return;
         }
 
         System.out.println("LOGIN:" + name + ':' + (players.size() + 1) + '/' + MAX_CLIENT_IN_PARTY_COUNT);
 
         players.add(new Player(client, name));
-        client.printMessage(LOGIN_SUCCESS.name());
+        client.print(formatMessage(RESPONSE_LOGIN.name(), serialize(true)));
     }
 
     @Override
     public void onEnd() {
-        players.forEach(player -> player.client().printMessage(PARTY_COMPLETE.name()));
+        players.forEach(player -> player.client().print(formatMessage(PARTY_COMPLETE.name())));
     }
 
     @Override

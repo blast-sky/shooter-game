@@ -1,4 +1,4 @@
-package com.astrog.shootergame.common.messaging;
+package com.astrog.shootergame.common.messaging.serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

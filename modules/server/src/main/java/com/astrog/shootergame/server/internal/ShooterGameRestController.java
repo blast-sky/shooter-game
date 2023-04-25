@@ -6,15 +6,22 @@ import com.astrog.shootergame.server.domain.Dispatcher;
 import com.astrog.shootergame.server.domain.RestController;
 import com.astrog.shootergame.server.domain.ServerState;
 import com.astrog.shootergame.server.domain.model.Message;
+import com.astrog.shootergame.server.internal.database.Score;
+import com.astrog.shootergame.server.internal.database.ScoreRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.astrog.shootergame.common.messaging.CustomEvent.RESPONSE_LEADERS_TABLE;
+import static com.astrog.shootergame.common.messaging.MessageFormatter.formatMessage;
+import static com.astrog.shootergame.common.messaging.serialization.ObjectToStringSerializer.serialize;
 
 
 public class ShooterGameRestController extends RestController {
 
     public static ShooterGameRestController currentController;
     private final List<Dispatcher> dispatcherChain = new ArrayList<>();
+    private final ScoreRepository scoreRepository = new ScoreRepository();
     private ServerState state;
 
     public ShooterGameRestController(ServerState initialState) {
@@ -60,7 +67,7 @@ public class ShooterGameRestController extends RestController {
                 return false;
             }
         });
-        dispatcherChain.add(new Dispatcher(CustomEvent.LOGIN.name()) {
+        dispatcherChain.add(new Dispatcher(CustomEvent.REQUEST_LOGIN.name()) {
             @Override
             protected boolean dispatch(Message message) {
                 updateStateIfEnded();
@@ -78,21 +85,23 @@ public class ShooterGameRestController extends RestController {
                 return false;
             }
         });
-        dispatcherChain.add(new Dispatcher(Event.DISCONNECTION.name()) {
-            @Override
-            protected boolean dispatch(Message message) {
-                updateStateIfEnded();
-                state.onDisconnection(message.from());
-                updateStateIfEnded();
-                return false;
-            }
-        });
         dispatcherChain.add(new Dispatcher(CustomEvent.START_GAME.name()) {
             @Override
             protected boolean dispatch(Message message) {
                 updateStateIfEnded();
                 state.onStartGame(message.from());
                 updateStateIfEnded();
+                return false;
+            }
+        });
+        dispatcherChain.add(new Dispatcher(CustomEvent.GET_LEADER_TABLE.name()) {
+            @Override
+            protected boolean dispatch(Message message) {
+                List<Score> scores = scoreRepository.getScores();
+                List<String> formattedScores = scores.stream()
+                    .map(score -> score.getName() + ": " + score.getWinsCount()).toList();
+                System.out.println("Send hibernate message");
+                message.from().print(formatMessage(RESPONSE_LEADERS_TABLE.name(), serialize(formattedScores)));
                 return false;
             }
         });

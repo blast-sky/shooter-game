@@ -9,6 +9,7 @@ import com.astrog.shootergame.server.domain.ServerState;
 import com.astrog.shootergame.server.domain.topic.Topic;
 import com.astrog.shootergame.server.internal.Player;
 import com.astrog.shootergame.server.internal.ShooterGameRestController;
+import com.astrog.shootergame.server.internal.database.ScoreRepository;
 import javafx.geometry.Point2D;
 
 import java.util.ArrayList;
@@ -18,12 +19,15 @@ import java.util.Map;
 
 import static com.astrog.shootergame.common.Constants.GAME_PANE_HEIGHT;
 import static com.astrog.shootergame.common.Constants.GAME_PANE_WIDTH;
-import static com.astrog.shootergame.common.Constants.ServerMessages.PARTY_COMPLETE;
-import static com.astrog.shootergame.common.messaging.ObjectToStringSerializer.serialize;
+import static com.astrog.shootergame.common.messaging.CustomEvent.ALL_PLAYERS;
+import static com.astrog.shootergame.common.messaging.CustomEvent.GAME_CONTEXT;
+import static com.astrog.shootergame.common.messaging.MessageFormatter.formatMessage;
+import static com.astrog.shootergame.common.messaging.serialization.ObjectToStringSerializer.serialize;
 import static java.lang.Thread.sleep;
 
 public class GamePlayServerState implements ServerState {
 
+    private final ScoreRepository scoreRepository = new ScoreRepository();
     private final List<Player> players;
     private final ArcherGameContext gameContext;
     private final Looper looper;
@@ -38,12 +42,14 @@ public class GamePlayServerState implements ServerState {
         this.isReady = new HashMap<>();
         this.looper = new Looper(() -> {
             if (gameContext.isOver()) {
+                String winner = gameContext.getWinner();
+                scoreRepository.increaseScoreToPlayerOrCreateAndIncrease(winner);
                 ShooterGameRestController.tryUpdateStateIfEnded();
                 throw new InterruptedException();
             }
             gameContext.update();
             TransferGameData transferGameData = createTransferDataFromContext();
-            topic.broadcast(serialize(transferGameData));
+            topic.broadcast(formatMessage(GAME_CONTEXT.name(), serialize(transferGameData)));
             sleep(100);
         });
     }
@@ -58,13 +64,10 @@ public class GamePlayServerState implements ServerState {
 
     @Override
     public void onStart() {
-        players.forEach(player -> {
-            List<String> names = players.stream().map(Player::name).toList();
-            player.client().printMessage(serialize(names));
-        });
+        List<String> names = players.stream().map(Player::name).toList();
+        players.forEach(player -> player.client().print(formatMessage(ALL_PLAYERS.name(), serialize(names))));
 
         players.stream().map(Player::client).forEach(topic::addListener);
-        topic.broadcast(serialize(gameContext));
     }
 
     @Override
@@ -99,7 +102,7 @@ public class GamePlayServerState implements ServerState {
 
     @Override
     public void onEnd() {
-        topic.broadcast(CustomEvent.GAME_OVER.name());
+        topic.broadcast(formatMessage(CustomEvent.GAME_OVER.name()));
     }
 
     @Override
