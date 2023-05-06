@@ -43,7 +43,7 @@ public class GamePlayServerState implements ServerState {
         this.looper = new Looper(() -> {
             if (gameContext.isOver()) {
                 String winner = gameContext.getWinner();
-                scoreRepository.increaseScoreToPlayerOrCreateAndIncrease(winner);
+                scoreRepository.increaseScoreForPlayerOrCreateAndIncrease(winner);
                 ShooterGameRestController.tryUpdateStateIfEnded();
                 throw new InterruptedException();
             }

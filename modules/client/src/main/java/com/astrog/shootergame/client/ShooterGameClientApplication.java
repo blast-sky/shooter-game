@@ -15,14 +15,14 @@ import lombok.SneakyThrows;
 
 import java.util.List;
 
-import static com.astrog.shootergame.common.Constants.HOST_IP;
+import static com.astrog.shootergame.common.Constants.HOST;
 import static com.astrog.shootergame.common.Constants.PORT;
 import static com.astrog.shootergame.common.messaging.serialization.ObjectToStringSerializer.deserialize;
 import static com.astrog.shootergame.common.messaging.serialization.SerializationTypes.stringListType;
 
 public class ShooterGameClientApplication extends Application {
 
-    private final ShooterGameClient client = new ShooterGameClient(HOST_IP, PORT);
+    private final ShooterGameClient client = new ShooterGameClient(HOST, PORT);
 
     public static void main(String[] args) {
         launch();
@@ -56,8 +56,7 @@ public class ShooterGameClientApplication extends Application {
         controller.toLoginScreen = () -> Platform.runLater(() -> setLoginSceneAndConfigureController(stage));
         controller.init(client);
         controller.initDrawer();
-        client.subscribeOnEvent(CustomEvent.ALL_PLAYERS, message -> {
-            client.removeSubscription(CustomEvent.ALL_PLAYERS);
+        client.subscribeOnEventOnce(CustomEvent.ALL_PLAYERS, message -> {
             List<String> allPlayerNames = deserialize(message, stringListType);
             Platform.runLater(() -> controller.drawPlayers(allPlayerNames, name));
         });

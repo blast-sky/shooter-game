@@ -1,7 +1,5 @@
 package com.astrog.shootergame.server.internal.database;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -24,7 +22,7 @@ public class ScoreRepository {
         }
     }
 
-    public void increaseScoreToPlayerOrCreateAndIncrease(String player) {
+    public void increaseScoreForPlayerOrCreateAndIncrease(String player) {
         try(Session session = openSession()) {
             Transaction transaction = session.beginTransaction();
 

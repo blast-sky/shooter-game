@@ -5,9 +5,9 @@ public class Constants {
 
     public static final int SCORE_TO_WIN = 10;
 
-    public static final int MAX_CLIENT_IN_PARTY_COUNT = 4;
+    public static final int MAX_CLIENT_IN_PARTY_COUNT = 1;
 
-    public static final String HOST_IP = "localhost";
+    public static final String HOST = "localhost";
 
     public static final double GAME_PANE_HEIGHT = 470;
 

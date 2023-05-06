@@ -9,8 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.id.IncrementGenerator;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,7 +19,6 @@ public class Score {
     @Id
     @Getter
     @GeneratedValue(generator = "increment")
-    @GenericGenerator(name = "increment", type = IncrementGenerator.class)
     private Long id;
 
     @Getter

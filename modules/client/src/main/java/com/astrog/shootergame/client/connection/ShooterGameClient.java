@@ -3,19 +3,15 @@ package com.astrog.shootergame.client.connection;
 import com.astrog.shootergame.common.lambda.LambdaStringParameter;
 import com.astrog.shootergame.common.messaging.CustomEvent;
 import com.astrog.shootergame.common.socket.Client;
+import javafx.util.Pair;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
-import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,13 +21,11 @@ import static com.astrog.shootergame.common.messaging.MessageFormatter.formatMes
 import static com.astrog.shootergame.common.messaging.MessageFormatter.reformatMessage;
 
 @RequiredArgsConstructor
-public class ShooterGameClient {
+public class ShooterGameClient extends SubscriptionResolver<CustomEvent> {
 
     private final String ip;
     private final int port;
     private final BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
-    private final Map<String, LambdaStringParameter> subscribers = new ConcurrentHashMap<>();
-    private final Set<String> onceSubscribers = new HashSet<>();
     private final ScheduledExecutorService messageDispatcher = Executors.newSingleThreadScheduledExecutor();
     @Getter
     private volatile Client client;
@@ -45,22 +39,14 @@ public class ShooterGameClient {
         try {
             if (client != null && client.isOpened()) {
                 String nextMessage = client.getNextMessage();
-                var message = reformatMessage(nextMessage);
-                var subscriber = subscribers.get(message.getKey());
-                if (subscriber != null) {
-                    if (onceSubscribers.contains(message.getKey())) {
-                        onceSubscribers.remove(message.getKey());
-                        subscribers.remove(message.getKey());
-                    }
-                    subscriber.run(message.getValue());
-                } else {
+                Pair<String, String> message = reformatMessage(nextMessage);
+                if (!handleEvent(CustomEvent.valueOf(message.getKey()), message.getValue())) {
                     messageQueue.put(nextMessage);
                 }
             } else {
                 Thread.sleep(1000);
             }
-        } catch (SocketTimeoutException exception) {
-            System.out.println("Reader timeout");
+        } catch (SocketTimeoutException ignore) {
         }
     }
 
@@ -78,7 +64,7 @@ public class ShooterGameClient {
 
     @SneakyThrows
     public void connectIfNotAlreadyConnected() {
-        if(!isConnected()) {
+        if (!isConnected()) {
             client = new Client(new Socket(ip, port));
             client.setSoTimeout(2000);
         }
@@ -97,31 +83,19 @@ public class ShooterGameClient {
         client.print(CustomEvent.GET_LEADER_TABLE.name());
     }
 
-    public synchronized void removeSubscription(CustomEvent event) {
-        subscribers.remove(event.name());
-    }
-
-    public void subscribeOnEventOnce(CustomEvent event, LambdaStringParameter lambda) {
-        onceSubscribers.add(event.name());
-        subscribeOnEvent(event, lambda);
-    }
-
     @SneakyThrows
     public void subscribeOnEvent(CustomEvent event, LambdaStringParameter lambda) {
-        synchronized (this) {
-            subscribers.put(event.name(), lambda);
-        }
-        runLambdaIfEventInMessageQueue(event, lambda);
+        super.subscribeOnEvent(event, lambda);
+        runLambdaIfEventInMessageQueue(event);
     }
 
-    private void runLambdaIfEventInMessageQueue(CustomEvent event, LambdaStringParameter lambda) {
+    private void runLambdaIfEventInMessageQueue(CustomEvent event) {
         messageQueue.stream()
             .filter(message -> message.contains(event.name()))
             .findFirst()
             .ifPresent(message -> {
                 messageQueue.remove(message);
-                onceSubscribers.remove(event.name());
-                lambda.run(reformatMessage(message).getValue());
+                handleEvent(event, reformatMessage(message).getValue());
             });
     }
 

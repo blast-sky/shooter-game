@@ -2,9 +2,10 @@ package com.astrog.shootergame.server.internal.database;
 
 import lombok.SneakyThrows;
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
+
+import java.util.Properties;
 
 public class SessionFactoryConfiguration {
 
@@ -13,9 +14,8 @@ public class SessionFactoryConfiguration {
     @SneakyThrows
     public static SessionFactory getFactory() {
         if (factory == null) {
-            synchronized (SessionFactory.class) {
+            synchronized (SessionFactoryConfiguration.class) {
                 if (factory == null) {
-                    Class.forName("org.postgresql.Driver");
                     factory = getSessionFactory();
                 }
             }
@@ -24,17 +24,43 @@ public class SessionFactoryConfiguration {
     }
 
     private static SessionFactory getSessionFactory() {
-        final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
-            .configure()
-            .build();
+        Configuration configuration = getConfiguration();
+        return configuration.buildSessionFactory();
+    }
 
-        try {
-            return new MetadataSources(registry)
-                .buildMetadata()
-                .buildSessionFactory();
-        } catch (Exception e) {
-            StandardServiceRegistryBuilder.destroy(registry);
-            throw e;
-        }
+    private static Configuration getConfiguration() {
+        Configuration configuration = new Configuration();
+
+        Properties propertiesWithEnvironmentVariables = getProperties();
+        configuration.setProperties(propertiesWithEnvironmentVariables);
+
+        configuration.addAnnotatedClass(Score.class);
+
+        return configuration;
+    }
+
+    private static Properties getProperties() {
+        Properties properties = new Properties();
+
+        properties.put(Environment.DRIVER, "org.postgresql.Driver");
+
+        //jdbc:postgresql://${hibernate_db_host}/${hibernate_db_name}
+        properties.put(Environment.URL, "jdbc:postgresql://" +
+            System.getenv("hibernate_db_host") + "/" + System.getenv("hibernate_db_name"));
+
+        properties.put(Environment.CONNECTION_PROVIDER, "org.hibernate.connection.C3P0ConnectionProvider");
+
+        properties.put(Environment.USER, "postgres");
+        properties.put(Environment.PASS, System.getenv("hibernate_password"));
+
+        //properties.put(Environment.C3P0_MAX_SIZE, "2");
+
+        properties.put(Environment.SHOW_SQL, "true");
+
+        properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
+
+        properties.put(Environment.HBM2DDL_AUTO, "update");
+
+        return properties;
     }
 }
